@@ -2,23 +2,13 @@ package jm.task.core.jdbc.util;
 import java.sql.*;
 
 public class Util {
-    // реализуйте настройку соеденения с БД
-    public static Connection connection;
-
-    static {
-        try {
-            connection = getCon();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+    private Util() {
     }
-
+    // реализуйте настройку соеденения с БД
+    private static Connection connection;
     public static Connection getCon() throws SQLException {
-        Connection connection = null;
-        try {
+        if (connection == null) {
             connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/mydb", "root", "29616895");
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
         return connection;
     }
