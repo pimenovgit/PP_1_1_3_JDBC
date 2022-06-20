@@ -2,6 +2,7 @@ package jm.task.core.jdbc.dao;
 
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
+import org.hibernate.id.factory.spi.MutableIdentifierGeneratorFactory;
 
 import javax.swing.plaf.nimbus.State;
 import java.sql.PreparedStatement;
@@ -19,7 +20,6 @@ public class UserDaoJDBCImpl implements UserDao {
     public void createUsersTable() throws SQLException {
         try ( Statement statement = Util.connection.createStatement()) {
         statement.executeUpdate("CREATE TABLE IF NOT EXISTS Users(id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(100), lastname VARCHAR(100), age TINYINT);");
-        System.out.println("Таблица удалена");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -28,7 +28,6 @@ public class UserDaoJDBCImpl implements UserDao {
     public void dropUsersTable() {
         try (Statement statement = Util.connection.createStatement()) {
             statement.executeUpdate("DROP TABLE IF EXISTS Users;");
-            System.out.println("Таблица удалена");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -51,7 +50,6 @@ public class UserDaoJDBCImpl implements UserDao {
         try (PreparedStatement preparedStatement = Util.connection.prepareStatement("DELETE FROM Users WHERE id = ?")) {
             preparedStatement.setLong(1, id);
             preparedStatement.executeUpdate();
-            System.out.println("Запись удалена");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -59,8 +57,8 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public List<User> getAllUsers() {
         List <User> list = new ArrayList<>();
-        try (Statement statement = Util.connection.createStatement()) {
-            ResultSet rs = statement.executeQuery("SELECT * FROM Users");
+        try (PreparedStatement preparedStatement = Util.connection.prepareStatement("SELECT * FROM Users")) {
+            ResultSet rs = preparedStatement.executeQuery();
             while (rs.next()) {
                 User user = new User();
                 user.setId(rs.getLong(1));
@@ -76,15 +74,8 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void cleanUsersTable() {
-        try (Statement statement = Util.connection.createStatement()) {
-            ResultSet rs = statement.executeQuery("SELECT COUNT(id) as count FROM users");
-            rs.next();
-            if (rs.getInt("count") == 0) {
-                System.out.println("В таблице нет значений");
-            } else {
-                statement.executeUpdate("DELETE FROM Users");
-                System.out.println("Таблица очищена");
-            }
+        try (PreparedStatement preparedStatement = Util.connection.prepareStatement("DELETE FROM Users")) {
+            preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
